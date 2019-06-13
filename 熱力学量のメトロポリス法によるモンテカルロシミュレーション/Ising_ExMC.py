@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import copy
 
 class Ising_Exchange_MC_2D:
-    def __init__(self, Nx = 20, Ny = 20, n = 100, steps = 60000, average = 5):
+    def __init__(self, Nx = 20, Ny = 20, n = 100, steps = 8000, average = 2):
         self.Nx = Nx
         self.Ny = Ny
         self.Ntot = Nx*Ny
@@ -141,11 +141,11 @@ class Ising_Exchange_MC_2D:
 
     def main(self):
         avsteps = int(self.steps * 2/self.average)
-        
+
         #ユーザーによるインスタンスを変更された場合の修正
         if self.steps != 60000 or self.n != 100:
             self.energy_array = np.zeros((self.n,2*self.steps+1))   #self.stepsか、self.nがデフォルト値と違った時にはenergy_arrayの形を変更
-            
+
             if self.n != 100:
                 self.KBT_array = np.linspace(0.001, 6, self.n) #self.nがデフォルト値と違った場合のみKBT_arrayの形も変更
 
@@ -167,17 +167,19 @@ class Ising_Exchange_MC_2D:
 
             i = 2*j
             if j % 2 == 1:
-                #まずスピンフリップ
-                self.replica_list, self.energy_list = self.spin_update(self.replica_list, self.KBT_array, self.energy_list)
-                self.energy_array[:,i+1] = self.energy_list
+                for i in range(self.Ntot):
+                    #まずスピンフリップ
+                    self.replica_list, self.energy_list = self.spin_update(self.replica_list, self.KBT_array, self.energy_list)
+                    self.energy_array[:,i+1] = self.energy_list
 
                 #次に温度交換
                 self.replica_list, self.energy_list = self.replica_exchange_odd(self.replica_list, self.KBT_array, self.energy_list)
                 self.energy_array[:,i+2] = self.energy_list
             if j % 2 == 0:
-                #まずスピンフリップ
-                self.replica_list, self.energy_list = self.spin_update(self.replica_list, self.KBT_array, self.energy_list)
-                self.energy_array[:,i+1] = self.energy_list
+                for i in range(self.Ntot):
+                    #まずスピンフリップ
+                    self.replica_list, self.energy_list = self.spin_update(self.replica_list, self.KBT_array, self.energy_list)
+                    self.energy_array[:,i+1] = self.energy_list
 
                 #次に温度交換
                 self.replica_list, self.energy_list = self.replica_exchange_even(self.replica_list, self.KBT_array, self.energy_list)
